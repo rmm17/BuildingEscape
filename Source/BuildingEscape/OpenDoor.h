@@ -16,16 +16,14 @@ class BUILDINGESCAPE_API UOpenDoor : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UOpenDoor();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void OpenDoor(float DeltaTime) const;
 	void CloseDoor(float DeltaTime) const;
+	float TotalMassOfActors() const;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	float InitialYaw;
@@ -36,4 +34,5 @@ private:
 	UPROPERTY(EditAnywhere) float DoorCloseDelay = 0.25f;
 	UPROPERTY(EditAnywhere) float DoorOpenInterpolationSpeed = 2.f;
 	UPROPERTY(EditAnywhere) float DoorCloseInterpolationSpeed = 2.f;
+	UPROPERTY(EditAnywhere) float MassToOpenDoor = 50.f;
 };
