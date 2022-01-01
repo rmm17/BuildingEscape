@@ -31,7 +31,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere) float Reach = 100.f;
+	UPROPERTY(EditAnywhere) float Reach = 200.f;
 
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 	UInputComponent* Input = nullptr;
@@ -45,7 +45,7 @@ private:
 	FHitResult GetPhysicsBodyInReach() const;
 
 	// Get the vector based on user location and view rotation to determine the player's reach on the level
-	FVector GetLineTraceEnd() const;
+	FVector GetPlayersReach() const;
 
 	// Get player's viewpoint
 	FPlayerViewPoint GetPlayerViewPoint() const;
