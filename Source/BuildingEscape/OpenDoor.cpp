@@ -2,6 +2,7 @@
 
 
 #include "OpenDoor.h"
+#include "Components/AudioComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
@@ -23,12 +24,11 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FindPressurePlate();
+	FindAudioComponent();
+
 	InitialYaw = GetOwner()->GetActorRotation().Yaw;
 	OpenAngle += GetOwner()->GetActorRotation().Yaw;
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
-
-	if (!PressurePlate)
-		UE_LOG(LogTemp, Error, TEXT("%s has the open door component on it, but no PressurePlate trigger volume set."), *GetOwner()->GetName());
 }
 
 
@@ -48,20 +48,48 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		CloseDoor(DeltaTime);
 }
 
-void UOpenDoor::OpenDoor(float DeltaTime) const 
+void UOpenDoor::FindPressurePlate() const 
+{
+	if (!PressurePlate)
+		UE_LOG(LogTemp, Error, TEXT("%s has the open door component on it, but no PressurePlate trigger volume set."), *GetOwner()->GetName());
+}
+
+void UOpenDoor::FindAudioComponent()
+{
+	Audio = GetOwner()->FindComponentByClass<UAudioComponent>();
+
+	if (!Audio)
+		UE_LOG(LogTemp, Error, TEXT("%s missing audio component"), *GetOwner()->GetName());
+}
+
+void UOpenDoor::OpenDoor(float DeltaTime) 
 {
 	FRotator ActorRotation = GetOwner()->GetActorRotation();
 	ActorRotation.Yaw = FMath::FInterpTo(ActorRotation.Yaw, OpenAngle, DeltaTime, DoorOpenInterpolationSpeed);
 
 	GetOwner()->SetActorRotation(ActorRotation);
+
+	CloseDoorSound = false;
+	if (Audio && !OpenDoorSound) 
+	{
+		Audio->Play();
+		OpenDoorSound = true;
+	}
 }
 
-void UOpenDoor::CloseDoor(float DeltaTime) const
+void UOpenDoor::CloseDoor(float DeltaTime)
 {
 	FRotator ActorRotation = GetOwner()->GetActorRotation();
 	ActorRotation.Yaw = FMath::FInterpTo(ActorRotation.Yaw, InitialYaw, DeltaTime, DoorCloseInterpolationSpeed);
 
 	GetOwner()->SetActorRotation(ActorRotation);
+
+	OpenDoorSound = false;
+	if (Audio && !CloseDoorSound)
+	{
+		Audio->Play();
+		CloseDoorSound = true;
+	}
 }
 
 float UOpenDoor::TotalMassOfActors() const
@@ -69,16 +97,29 @@ float UOpenDoor::TotalMassOfActors() const
 	float TotalMass = 0.f;
 	TArray<AActor*> OverlappingActors;
 
+	if (!PressurePlate)
+		return 0.f;
+
 	// Find all overlapping actors
 	PressurePlate->GetOverlappingActors(OUT OverlappingActors);
 
 	// Add up their masses
 	for (AActor* Actor : OverlappingActors) {
-		UPrimitiveComponent* ActorRootComponent = (UPrimitiveComponent*)Actor->GetComponentByClass(UPrimitiveComponent::StaticClass());
-		
-		if (ActorRootComponent->IsSimulatingPhysics())
-			TotalMass += ActorRootComponent->GetMass();
+		UPrimitiveComponent* Component = GetActorComponent(Actor);
+
+		if (!Component)
+			continue;
+
+		if (Component->IsSimulatingPhysics())
+			TotalMass += Component->GetMass();
 	}
 
 	return TotalMass;
+}
+
+UPrimitiveComponent* UOpenDoor::GetActorComponent(AActor* Actor) const {
+	// Probably ideal to just use FindComponentByClass to avoid casting, but for now remains in the code as an example for casting.
+	UActorComponent* Component = Actor->GetComponentByClass(UPrimitiveComponent::StaticClass());
+
+	return Cast<UPrimitiveComponent>(Component);
 }

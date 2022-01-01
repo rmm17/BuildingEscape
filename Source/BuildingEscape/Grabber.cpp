@@ -30,6 +30,9 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!PhysicsHandle)
+		return;
+
 	// If the physics handle is attached move the object we are holding.
 	if (PhysicsHandle->GrabbedComponent)
 		PhysicsHandle->SetTargetLocation(GetPlayersReach());
@@ -42,7 +45,7 @@ void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 
-	if (PhysicsHandle == nullptr)
+	if (!PhysicsHandle)
 		UE_LOG(LogTemp, Error, TEXT("Object %s: No physics handle component found."), *GetOwner()->GetName());
 }
 
@@ -65,7 +68,7 @@ void UGrabber::Grab()
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 
 	// If we hit something then attach the physics handle.
-	if (ComponentToGrab)
+	if (ComponentToGrab && PhysicsHandle)
 		PhysicsHandle->GrabComponentAtLocation
 		(
 			ComponentToGrab,
@@ -76,6 +79,9 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	if (!PhysicsHandle)
+		return;
+
 	PhysicsHandle->ReleaseComponent();
 }
 

@@ -17,22 +17,27 @@ public:
 	// Sets default values for this component's properties
 	UOpenDoor();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void OpenDoor(float DeltaTime) const;
-	void CloseDoor(float DeltaTime) const;
+	void FindPressurePlate() const;
+	void FindAudioComponent();
+	void OpenDoor(float DeltaTime);
+	void CloseDoor(float DeltaTime);
 	float TotalMassOfActors() const;
+	UPrimitiveComponent* GetActorComponent(AActor* Actor) const;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
+	bool OpenDoorSound = false;
+	bool CloseDoorSound = true;
 	float InitialYaw;
 	float DoorLastOpened = 0.f;
 	UPROPERTY(EditAnywhere) float OpenAngle = -90.f;
-	UPROPERTY(EditAnywhere) ATriggerVolume* PressurePlate;
-	UPROPERTY(EditAnywhere) AActor* ActorThatOpens;
+	UPROPERTY(EditAnywhere) ATriggerVolume* PressurePlate = nullptr;
 	UPROPERTY(EditAnywhere) float DoorCloseDelay = 0.25f;
 	UPROPERTY(EditAnywhere) float DoorOpenInterpolationSpeed = 2.f;
 	UPROPERTY(EditAnywhere) float DoorCloseInterpolationSpeed = 2.f;
 	UPROPERTY(EditAnywhere) float MassToOpenDoor = 50.f;
+	UPROPERTY() UAudioComponent* Audio = nullptr;
 };
