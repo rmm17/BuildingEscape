@@ -7,4 +7,4 @@ Tools used: Unreal Engine v4.27.1 and Visual Studio 2019 Community
 
 Build and compile using Unreal Engine v4.27+
 
-Link to Youtube with gameplay: https://www.youtube.com/watch?v=0_jFjTfg_UM
+Link to Youtube with gameplay: https://youtu.be/0_jFjTfg_UM
